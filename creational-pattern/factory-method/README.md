@@ -1,83 +1,38 @@
 # Factory Method
 
-The Factory Patern is a Creational Pattern that provides an interface for creating objects in a superclass, but allows
-subclasses to alter the type of objects that will be created. In simpler terms, it is a way of creating an object without
-specifying the exact class of object that will be created.
+Factory method adalah salah satu design pattern dalam kategori creational pattern. Fungsi dari factory method adalah untuk mengizinkan sebuah class atau object untuk membuat object lain. Tujuan utamanya adalah untuk menyediakan sebuah interface bagi pembuatan object, tetapi memungkinkan subclass untuk mengubah tipe object yang akan di buat.
 
-The Factory Method Pattern is useful when we want to create objects without knowing their exact class. Instead of creating objects
-directly, we delegate the creation to a factory that can decide which class of object to create based on certain conditions.
-This makes our code more flexible and easier to maintain.
+Pattern ini memisahkan proses pembuatan object dari penggunaan object tersebut., memberikan fleksibilitas untuk mengubah implementasi yang digunakan untuk membuat object tanpa mengubah code yang menggunakan object tersebut. Dengan menggunakan factory method, code client dapat berinteraksi dengan object melalui interface yang umum tanpa perlu mengetahui implementasi spesifik dari object yang digunakan.
 
-# Implementation
+# Komponen utama factory method
 
-In Golang, we can implement the Factory Method pattern using an interface and a struct. The interface will define a method that will be implemented by the struct to create objects. Here is an example:
+- Product: Interface yang mendefinisikan object yang akan di buat oleh factory method.
+- ConcreteProduct: Implementasi dari interface Product.
+- Creator: Class yang mendeklarasikan factory method yang mengembalikan object dari type Product. Class ini biasanya memiliki implementasi default dari factory method yang dapat diubah oleh subclass.
+- ConcreteCreator: Subclass yang mengimplementasikan factory method untuk membuat dan mengembalikan objject dari type product tertentu.
 
-```go
-// Define an interface for creating objects
-type Product interface {
-    GetName() string
-}
+# Contoh kasus
 
-// Define a struct that implements the interface
-type ConcreteProduct struct {
-    name string
-}
+Factory method bisa sangat berguna dalam berbagai situasi. Berikut adalah contoh penggunaan factory method:
 
-func NewConcreteProduct(name string) *ConcreteProduct {
-    return &ConcreteProduct{name: name}
-}
+1. System Payment
+   - Mengelola berbagai jenis pembayaran seperti kartu kredit, transfer bank, dan e-wallet dengan mengizinkan code client untuk menggunakan method pembayaran secara transparan.
+2. System Database Connection
+   - Menghubungkan berbagai jenis database seperti MySQL, PostgreSQL, dan MongoDB dengan mengizinkan code client untuk menggunakan database
+3. Notification System
+   - Mengirimkan notifikasi melalui berbagai media seperti email, SMS, dan push notification dengan mengizinkan code client untuk mengirimkan notifikasi tanpa perlu mengetahui media yang digunakan.
+4. System Logging
+   - Mencatat log aplikasi ke berbagai media seperti file, database, dan console dengan mengizinkan code client untuk mencatat log tanpa perlu mengetahui media yang digunakan.
+5. System Shipping
+   - Mengatur pengiriman barang ke berbagai lokasi dengan mengizinkan code client untuk mengatur pengiriman tanpa perlu mengetahui lokasi pengiriman.
 
-func (p *ConcreteProduct) GetName() string {
-    return p.name
-}
+# Kelebihan dan Kekurangan
 
-// factory method
-type Factory interface {
-    CreateProduct() Product
-}
+1. Kelebihan
 
-// Define a struct that implements the factory interface
-type ConcreteFactory struct {
-}
+   - Kamu menghindari duplikasi code dengan memisahkan creator dan concrete product.
+   - Single Responsibility Principle: Kamuu bisa memindahkan product creation ke 1 tempat kedalam program, sehingga code lebih mudah untuk di support.
+   - Open/Closed Principle: Kamu dapat memperkenalkan product type baru kedaam program tanpa merusak code client yang sudah ada.
 
-func NewConcreteFactory() *ConcreteFactory {
-    return &ConcreteFactory{}
-}
-
-func (f *ConcreteFactory) CreateProduct() Product {
-    return &ConcreteProduct{name: "ConcreteProduct"}
-}
-```
-
-In this example, we have defined an interface `Product` with a method `GetName()` which will be implemented by the struct `ConcreteProduct`. We also define the `factory` interface with a method `CreateProduct()` which will be implemented by the struct `ConcreteFactory`.
-
-The `CreateProduct()` method in the `ConcreteFactory` struct creates an instance of the `ConcreteProduct` struct and returns it as a `Product` interface. This way, the client code can create objects without knowing the exact class of the object.
-
-# Usage
-
-Here is an example of how we can use the Factory Method pattern to create objects:
-
-```go
-func main() {
-    factory := NewConcreteFactory()
-    product := factory.CreateProduct()
-    fmt.Println(product.GetName())
-}
-```
-
-In this example, we create an instance of the `ConcreteFactory` struct and use it to create an instance of the `ConcreteProduct` struct. We then call the `GetName()` method on the product to get its name.
-
-# Advantages of Using the Factory Method Pattern
-
-- Flexibility: The Factory Method pattern allows us to create objects without knowing their exact class. This makes our code more flexible and easier to maintain.
-- Scalability: The Factory Method pattern allows us to add new classes of objects without modifying the existing code. This makes our code more scalable and easier to extend.
-- Decoupling: The Factory Method pattern decouples the creation of objects from their usage. This makes our code more modular and easier to test.
-
-# Conclusion
-
-The Factory Pattern is a useful pattern for creating objects without knowing their exact class. In Golang, we can implement this pattern using an interface and a struct.
-By using this pattern, we can make our code more flexible. So, if you want to improve the scalability and maintainability of your code, consider using the Factory Method pattern.
-
-# References
-
-https://blog.matthiasbruns.com/golang-factory-method-pattern
+2. Kekurangan
+   - Code dapat menjadi lebih rumit karena anda perlu memperkenalkan banyak subclass baru untuk mengimplementasikan pattern ini. Skenario kasus terbaik adalah ketika anda memperkenalkan pattern ke dalam hirarki creator class yang sudah ada.

@@ -3,84 +3,74 @@ package main
 import "fmt"
 
 func main() {
-	factory := NewTransportationFactory()
-	truck := factory.CreateTransportation("Truck")
-	pesawat := factory.CreateTransportation("Pesawat")
-	kapal := factory.CreateTransportation("Kapal")
+	mysql := NewDatabaseConnection("MySQL")
+	println(mysql.Connect())
 
-	fmt.Println(truck.SetShip())
-	fmt.Println(pesawat.SetShip())
-	fmt.Println(kapal.SetShip())
+	postgres := NewDatabaseConnection("PostgreSQL")
+	println(postgres.Connect())
 }
 
-type Tranportation interface {
-	SetShip() string
-}
-
-// concrete product
-type Truck struct {
-	Name string
-}
-
-func NewTruck(name string) *Truck {
-	return &Truck{
-		Name: name,
-	}
-}
-
-func (t *Truck) SetShip() string {
-	return t.Name
+// product
+type DatabaseConnection interface {
+	Connect() string
 }
 
 // concrete product
-type Pesawat struct {
-	Name string
+type MySQLConnection struct {
+	Dsn string
 }
 
-func NewPesawat(name string) *Pesawat {
-	return &Pesawat{
-		Name: name,
-	}
-}
-
-func (t *Pesawat) SetShip() string {
-	return t.Name
+func (m *MySQLConnection) Connect() string {
+	return fmt.Sprintf("Connecting to %s", m.Dsn)
 }
 
 // concrete product
-type Kapal struct {
-	Name string
+type PostgreSQLConnection struct {
+	Dsn string
 }
 
-func NewKapal(name string) *Kapal {
-	return &Kapal{
-		Name: name,
+func (p *PostgreSQLConnection) Connect() string {
+	return fmt.Sprintf("Connecting to %s", p.Dsn)
+}
+
+// creator
+type DatabaseConnectionFactory interface {
+	CreateConnection() DatabaseConnection
+}
+
+// concrete creator
+type MySQLConnectionFactory struct{}
+
+func NewMySQLConnectionFactory() *MySQLConnectionFactory {
+	return &MySQLConnectionFactory{}
+}
+
+func (m *MySQLConnectionFactory) CreateConnection() DatabaseConnection {
+	return &MySQLConnection{
+		Dsn: "mysql://root:root@localhost:3306/db",
 	}
 }
 
-func (t *Kapal) SetShip() string {
-	return t.Name
+// concrete creator
+type PostgreSQLConnectionFactory struct{}
+
+func NewPostgreSQLConnectionFactory() *PostgreSQLConnectionFactory {
+	return &PostgreSQLConnectionFactory{}
+}
+
+func (p *PostgreSQLConnectionFactory) CreateConnection() DatabaseConnection {
+	return &PostgreSQLConnection{
+		Dsn: "postgres://root:root@localhost:5432/db",
+	}
 }
 
 // factory method
-type factory interface {
-	CreateTransportation(transportationType string) Tranportation
-}
-
-type TransportationFactory struct{}
-
-func NewTransportationFactory() factory {
-	return &TransportationFactory{}
-}
-
-func (t *TransportationFactory) CreateTransportation(transportationType string) Tranportation {
-	switch transportationType {
-	case "Truck":
-		return NewTruck("Truck")
-	case "Pesawat":
-		return NewPesawat("Pesawat")
-	case "Kapal":
-		return NewKapal("Kapal")
+func NewDatabaseConnection(dbType string) DatabaseConnection {
+	switch dbType {
+	case "MySQL":
+		return NewMySQLConnectionFactory().CreateConnection()
+	case "PostgreSQL":
+		return NewPostgreSQLConnectionFactory().CreateConnection()
 	default:
 		return nil
 	}
