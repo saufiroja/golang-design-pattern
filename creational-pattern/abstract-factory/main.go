@@ -14,6 +14,31 @@ func NewSportsFactory(brand string) (ISportsFactory, error) {
 	return &Adidas{}, nil
 }
 
+// concrete factory
+type Adidas struct{}
+
+func NewAdidas() ISportsFactory {
+	return &Adidas{}
+}
+
+func (a *Adidas) makeShoe() IShoe {
+	return &AdidasShoe{
+		Shoe: Shoe{
+			logo: "adidas",
+			size: 14,
+		},
+	}
+}
+
+func (a *Adidas) makeShirt() IShirt {
+	return &AdidasShirt{
+		Shirt: Shirt{
+			logo: "adidas",
+			size: 14,
+		},
+	}
+}
+
 // abstract product
 type IShoe interface {
 	setLogo(logo string)
@@ -80,31 +105,6 @@ type AdidasShoe struct {
 // concrete product
 type AdidasShirt struct {
 	Shirt
-}
-
-// concrete factory
-type Adidas struct{}
-
-func NewAdidas() ISportsFactory {
-	return &Adidas{}
-}
-
-func (a *Adidas) makeShoe() IShoe {
-	return &AdidasShoe{
-		Shoe: Shoe{
-			logo: "adidas",
-			size: 14,
-		},
-	}
-}
-
-func (a *Adidas) makeShirt() IShirt {
-	return &AdidasShirt{
-		Shirt: Shirt{
-			logo: "adidas",
-			size: 14,
-		},
-	}
 }
 
 func main() {
