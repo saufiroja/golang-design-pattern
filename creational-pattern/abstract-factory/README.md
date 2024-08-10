@@ -1,14 +1,14 @@
 # Abstract Factory
 
-Abstract Factory adalah salah satu dari creational design pattern yang memberikan interface untuk membuat membuat family dari object terkait atau bergantung tanpa harus menentukan class spesifik. Dalam context pemrogramanan, pattern ini membantu dalam membuat system yang dapat dengan mudah diperluas dan dirubah tanpa harus mengubah code yang sudah ada.
+Abstract Factory adalah salah satu dari creational design pattern, pattern ini digunakan untuk membuat interface atau class abstrak untuk membuat kelompok object yang terkait tanpa harus menentukan class konkretnya. Abstrac factory memungkinkan code untuk lebih fleksibel dan mudah diubah karena tidak tergantung pada class konkrit.
 
-# Konsep Abstract Factory
+# Problem
 
-Konsep utama dari Abstract Factory adalah:
+Misalkan kamu sedang membuat aplikasi payment service dengan berbagai jenis pembayaran seperti Paypal, Stripe, dan lain-lain. Setiap Jenis pembayaran ini memiliki cara implementasi yang berbeda-beda(misalnya, cara pembayaran, cara verifikasi, dll). Jika kamu membuat obect dari masing-masing enis pembayaran secara langsung, maka ini akan membuat code menjadi sulit diubah dan tidak fleksibel. Jika kamu ingin menambahkan jenis pembayaran baru atau mengubah implementasi dari salah satu method yang sudah ada, maka kamu harus melakukan perubahan pada banyak tempat, yang beresiko membuat code menjadi error.
 
-1. **Interface**: Mendefinisikan interface untuk membuat object, bukan instansiasi langsung class tertentu.
-2. **Family of Product**: Membuat object yang saling berhubungan.
-3. **Decoupling**: Memisahkan pembuatan object dengan implementasi class.
+# Solusi
+
+Dengan menggunakan abstract factory, kamu bisa membuat 1 interface untuk membuat kelompok object terkait, seperti `PaymentFactory`. Setiap enis pembayaran akan memiliki implementasinya sendiri, misalnya `PaypalFactory`, `StripeFactory`, dll. Ketika aplikasi memerlukan pembayaran, ia akan menggunakan factory yang tepat tanpa harus mengetahui detail implementasinya dari masing-masing jenis pembayaran. Ini memungkinkan kamu untuk menambah atau mengubah jenis pembayaran tanpa mengubah banyak tempat pada code.
 
 # Struktur Abstract Factory
 

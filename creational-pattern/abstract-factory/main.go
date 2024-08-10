@@ -1,125 +1,117 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
-// abstract factory interface
-type ISportsFactory interface {
-	makeShoe() IShoe
-	makeShirt() IShirt
+// abstract product
+type Payment interface {
+	ProccessPayment(amount float32) float32
+	AuthorizePayment(credential string) bool
 }
 
-func NewSportsFactory(brand string) (ISportsFactory, error) {
-	return &Adidas{}, nil
+// concrete product
+type Gopay struct {
+	apiKey string
+}
+
+func newGopay() *Gopay {
+	return &Gopay{}
+}
+
+func (g *Gopay) ProccessPayment(amount float32) float32 {
+	fmt.Printf("Paying with Gopay amount %f\n", amount)
+	return amount
+}
+
+func (g *Gopay) AuthorizePayment(credential string) bool {
+	if credential != "123" {
+		fmt.Println("AuthorizePayment failed")
+		return false
+	}
+	fmt.Println("AuthorizePayment success")
+	return true
+}
+
+type Ovo struct {
+	token string
+}
+
+func newOvo() *Ovo {
+	return &Ovo{}
+}
+
+func (o *Ovo) ProccessPayment(amount float32) float32 {
+	fmt.Printf("Paying with Ovo amount %f\n", amount)
+	return amount
+}
+
+func (o *Ovo) AuthorizePayment(credential string) bool {
+	if credential != "test" {
+		fmt.Println("AuthorizePayment failed")
+		return false
+	}
+	fmt.Println("AuthorizePayment success")
+	return true
+}
+
+// abstract factory
+type PaymentMethodFactory interface {
+	CreatePayment() Payment
 }
 
 // concrete factory
-type Adidas struct{}
 
-func NewAdidas() ISportsFactory {
-	return &Adidas{}
+type GopayFactory struct {
 }
 
-func (a *Adidas) makeShoe() IShoe {
-	return &AdidasShoe{
-		Shoe: Shoe{
-			logo: "adidas",
-			size: 14,
-		},
+func newGopayFactory() *GopayFactory {
+	return &GopayFactory{}
+}
+
+func (g *GopayFactory) CreatePayment() Payment {
+	return newGopay()
+}
+
+type OvoFactory struct {
+}
+
+func newOvoFactory() *OvoFactory {
+	return &OvoFactory{}
+}
+
+func (o *OvoFactory) CreatePayment() Payment {
+	return newOvo()
+}
+
+// client
+
+func GetPaymentMethodFactory(paymentMethod string) PaymentMethodFactory {
+	if paymentMethod == "gopay" {
+		return newGopayFactory()
 	}
-}
 
-func (a *Adidas) makeShirt() IShirt {
-	return &AdidasShirt{
-		Shirt: Shirt{
-			logo: "adidas",
-			size: 14,
-		},
+	if paymentMethod == "ovo" {
+		return newOvoFactory()
 	}
-}
 
-// abstract product
-type IShoe interface {
-	setLogo(logo string)
-	setSize(size int)
-	getLogo() string
-	getSize() int
-}
-
-type Shoe struct {
-	logo string
-	size int
-}
-
-func (s *Shoe) setLogo(logo string) {
-	s.logo = logo
-}
-
-func (s *Shoe) setSize(size int) {
-	s.size = size
-}
-
-func (s *Shoe) getLogo() string {
-	return s.logo
-}
-
-func (s *Shoe) getSize() int {
-	return s.size
-}
-
-// abstract product
-type IShirt interface {
-	setLogo(logo string)
-	setSize(size int)
-	getLogo() string
-	getSize() int
-}
-
-type Shirt struct {
-	logo string
-	size int
-}
-
-func (s *Shirt) setLogo(logo string) {
-	s.logo = logo
-}
-
-func (s *Shirt) setSize(size int) {
-	s.size = size
-}
-
-func (s *Shirt) getLogo() string {
-	return s.logo
-}
-
-func (s *Shirt) getSize() int {
-	return s.size
-}
-
-// concrete product
-type AdidasShoe struct {
-	Shoe
-}
-
-// concrete product
-type AdidasShirt struct {
-	Shirt
+	return nil
 }
 
 func main() {
-	factory, err := NewSportsFactory("adidas")
-	if err != nil {
-		fmt.Println(err)
+	var paymentMethod string
+	var credential string
+	fmt.Scanln(&credential)
+	fmt.Scanln(&paymentMethod)
+
+	paymentMethodFactory := GetPaymentMethodFactory(paymentMethod)
+	if paymentMethodFactory == nil {
+		fmt.Println("Invalid payment method")
 		return
 	}
 
-	shirt := factory.makeShirt()
-	shoe := factory.makeShoe()
-
-	fmt.Printf("Logo: %s\n", shirt.getLogo())
-	fmt.Printf("Size: %d\n", shirt.getSize())
-
-	fmt.Printf("Logo: %s\n", shoe.getLogo())
-	fmt.Printf("Size: %d\n", shoe.getSize())
+	payment := paymentMethodFactory.CreatePayment()
+	if !payment.AuthorizePayment(credential) {
+		fmt.Println("Payment failed")
+		return
+	}
+	payment.ProccessPayment(100)
 }
