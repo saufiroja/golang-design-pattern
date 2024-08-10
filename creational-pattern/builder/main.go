@@ -2,73 +2,81 @@ package main
 
 import "fmt"
 
-// Product
-type Pizza struct {
-	Dough    string
-	Sauce    string
-	Cheese   string
-	Toppings []string
+// builder interface
+type IPerson interface {
+	SetName(name string) string
+	SetAge(age int) int
+	SetPhone(phone string) string
+	SetPerson() *Person
 }
 
-// Builder interface
-type PizzaBuilder interface {
-	SetDough(dough string) *ConcretePizzaBuilder
-	SetSauce(sauce string) *ConcretePizzaBuilder
-	SetCheese(cheese string) *ConcretePizzaBuilder
-	SetToppings(toppings []string) *ConcretePizzaBuilder
-	Build() *Pizza
+// product
+type Person struct {
+	name  string
+	age   int
+	phone string
 }
 
-// Concrete Builder
-type ConcretePizzaBuilder struct {
-	pizza *Pizza
+// concrete builder
+type PersonBuilder struct {
+	name  string
+	age   int
+	phone string
 }
 
-func NewConcretePizzaBuilder() PizzaBuilder {
-	return &ConcretePizzaBuilder{pizza: &Pizza{}}
+func newPersonBuilder() *PersonBuilder {
+	return &PersonBuilder{}
 }
 
-func (pb *ConcretePizzaBuilder) SetDough(dough string) *ConcretePizzaBuilder {
-	pb.pizza.Dough = dough
-	return pb
+func (p *PersonBuilder) SetName(name string) string {
+	p.name = name
+	return p.name
 }
 
-func (pb *ConcretePizzaBuilder) SetSauce(sauce string) *ConcretePizzaBuilder {
-	pb.pizza.Sauce = sauce
-	return pb
+func (p *PersonBuilder) SetAge(age int) int {
+	p.age = age
+	return p.age
 }
 
-func (pb *ConcretePizzaBuilder) SetCheese(cheese string) *ConcretePizzaBuilder {
-	pb.pizza.Cheese = cheese
-	return pb
+func (p *PersonBuilder) SetPhone(phone string) string {
+	p.phone = phone
+	return p.phone
 }
 
-func (pb *ConcretePizzaBuilder) SetToppings(toppings []string) *ConcretePizzaBuilder {
-	pb.pizza.Toppings = toppings
-	return pb
+func (p *PersonBuilder) SetPerson() *Person {
+	return &Person{
+		name:  p.name,
+		age:   p.age,
+		phone: p.phone,
+	}
 }
 
-func (pb *ConcretePizzaBuilder) Build() *Pizza {
-	return pb.pizza
+// director
+type PersonDirector struct {
+	builder IPerson
 }
 
-// Director
-type Director struct {
-	builder PizzaBuilder
+func newPersonDirector(builder IPerson) *PersonDirector {
+	return &PersonDirector{builder: builder}
 }
 
-func NewDirector(builder PizzaBuilder) *Director {
-	return &Director{builder: builder}
+func (pd *PersonDirector) setBuilder(builder IPerson) {
+	pd.builder = builder
 }
 
-func (d *Director) Construct() *Pizza {
-	return d.builder.SetDough("Thin Crust").SetSauce("Tomato").SetCheese("Mozzarella").SetToppings([]string{"Mushrooms", "Olives", "Onions"}).Build()
+func (pd *PersonDirector) build(name, phone string, age int) *Person {
+	pd.builder.SetName(name)
+	pd.builder.SetAge(age)
+	pd.builder.SetPhone(phone)
+	return pd.builder.SetPerson()
 }
 
+// client
 func main() {
-	builder := NewConcretePizzaBuilder()
-	director := NewDirector(builder)
-	pizza := director.Construct()
+	builder := newPersonBuilder()
+	director := newPersonDirector(builder)
 
-	fmt.Println(pizza)
+	person := director.build("John Doe", "123456789", 30)
+
+	fmt.Println(person)
 }
