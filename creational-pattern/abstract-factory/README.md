@@ -17,3 +17,13 @@ Dengan menggunakan abstract factory, kamu bisa membuat 1 interface untuk membuat
 3. **Abstract Product**: Interface untuk product yang akan dibuat.
 4. **Concrete Product**: Implementasi dari Abstract Product.
 5. **Client**: Menggunakan Abstract Factory dan product yang dibuat.
+
+# Kekurangan dan Kelebihan
+
+1. Kelebihan
+   - Kami bisa yakin bahwa product yang kamu dapatkan dari facory compatible dengan product lainnya
+   - Kamu dapat menghindari ketidaksesuaian antara concrete product dan client
+   - Single Responsibility Principle. Kamu dapat mengekstrak code product creation ke dalam satu tempat, membuat code lebih mudah diubah dan dikelola.
+   - Open/Closed, Kmau dapat memperkenalkan jenis product baru tanpa merubah code yang sudah ada.
+2. Kekurangan
+   - Code dapat menjadi lebih rumit dari yang seharusnya, karena banyak interface dan class yang harus dibuat.
