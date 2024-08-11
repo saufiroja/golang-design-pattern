@@ -1,34 +1,40 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
-type Cloneable interface {
-	Clone() Cloneable
+// UserPrototype defines the interface for the prototype pattern
+type UserPrototype interface {
+	Clone() UserPrototype
 }
 
-type Person struct {
-	Name string
-	Age  int
+// User is the concrete prototype
+type User struct {
+	Name  string
+	Email string
 }
 
-func NewPerson(name string, age int) Cloneable {
-	return &Person{
-		Name: name,
-		Age:  age,
-	}
-}
-
-func (p *Person) Clone() Cloneable {
-	return &Person{
-		Name: p.Name,
-		Age:  p.Age,
+// Clone method creates a shallow copy of the User object
+func (u *User) Clone() UserPrototype {
+	return &User{
+		Name:  u.Name,
+		Email: u.Email,
 	}
 }
 
 func main() {
-	person1 := NewPerson("John", 30)
-	person2 := person1.Clone().(*Person)
+	user1 := &User{
+		Name:  "John Doe",
+		Email: "test@mail.com",
+	}
 
-	fmt.Println(person1)
-	fmt.Println(person2)
+	user2 := user1.Clone().(*User)
+
+	// Change clone without affecting original
+	user2.Name = "Jane Doe"
+	user2.Email = "test2@mail.com"
+
+	fmt.Println(user1)
+	fmt.Println(user2)
 }

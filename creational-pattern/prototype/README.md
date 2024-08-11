@@ -1,45 +1,71 @@
 # Prototype Pattern
 
-The prototype pattern is a creational design pattern that allows obeject to be created from existing objects of the same class. This pattern is useful when creating objects is expensive or time consuming, and you want to avoid unnecessary duplication of objects.
+Prototype adalah design patern yang digunakan untuk membuat object baru dengan menyalin obect yang sudah ada. Pattern ini sangat berguna ketika proses pembuatan object sangat kompleks dan kamu perlu membuat banyak object yang mirip satu sama lain.
 
-To Implement the prototype pattern in go, you can define an interface that includes a method to clone the objects. Then, you can define a struct that impelements this interface and provides a clone method that returns a copy of itself.
+# Problem
 
-## Example
+Misalkan dalam aplikasi yang memiliki berbagai tipe user dengan sejumlah besar konfigurasi yang berbeda. Membuat object untuk setiap tipe use secara manual akan sangat memakan waktu dan rentan terhadap kesalahan, terutama jika konfigurasi tersebut sering berubah.
+
+Proses ini akan memerlukan banyak duplikasi code dan konsumsi memory yang tidak efisien. Menambahkan atau mengubah setelan user uga akan membutuhkan perubahan yang signifikan diberbagai tempat dalam code, yang meningkatkan risiko kesalahan.
+
+# Solution
+
+Menggunakan prototype pattern memungkinkan kamu membuat object baru dengan cepat tanpa harus memulai dari awal. Kamu dapat membuat obect baru dengan menyalin object yang sudah ada dan mengubah bagian yang diperlukan.
+
+Prototype pattern mengurangi kebutuhan untuk menulis code yang sama berulang-ulang untuk membuat object dengan properti serupa, sehingga membuat code lebih bersih dan lebih mudah dikelola.
+
+Jika ada perubahan dalam structure atau properti object, kamu hanya perlu mengubah prototype object, dan perubahan tersebut akan otomatis diterapkan pada semua object yang dibuat dari prototype tersebut.
+
+# Structure
+
+Prototype pattern di Go biasanya melibatkan structure yang berisi data state dan method untuk mengclone object tersebut.
 
 ```go
-type Cloneable interface {
-    Clone() Cloneable
+
+// prototype interface
+type UserPrototype interface {
+    Clone() UserPrototype
 }
 
-type Person struct {
-    Name string
-    Age int
+// concrete prototype
+type User struct {
+    Name  string
+    Email string
 }
 
-func NewPerson(name string, age int) Cloneable {
-    return &Person{
-        Name: name,
-        Age: age,
+// method to clone object
+func (u *User) Clone() UserPrototype {
+    // shallow copy
+    return &User{
+        Name:  u.Name,
+        Email: u.Email,
     }
 }
 
-func (p *Person) Clone() Cloneable {
-    return &Person{
-        Name: p.Name,
-        Age: p.Age,
-    }
-}
-```
-
-In this example, we define a `Clonable` interface that includes a `Clone` method. Then, we define a `Person` struct that implement this interface and provides a `Clone` that return a copy of itself.
-In the `main` function, we create a `person1` object and then use the `clone` method to create a copy of it `person2`. We can then print both objects to confirm that `person2` is a copy of `person1`.
-
-```go
 func main() {
-    person1 := NewPerson("John", 30)
-    person2 := person1.Clone().(*Person)
+    user1 := &User{
+        Name:  "John Doe",
+        Email: "test@mail.com",
+    }
 
-    fmt.Printf("person1: %+v\n", person1)
-    fmt.Printf("person2: %+v\n", person2)
+    user2 := user1.Clone()
+
+    fmt.Println(user1)
+    fmt.Println(user2)
 }
+
 ```
+
+# Kapan Harus Menggunakan Prototype Pattern
+
+# Kelebihan dan Kekurangan
+
+1. Kelebihan
+
+   - Kamu dapa mengclone objject tanpa mengaitkan ke class konkrit
+   - Kamu dapat menyingkirkan code inisialisasi yang berulang demi mengclone prototype yang telah dibuat sebelumnya
+   - Kamu dapat menghasilkan object yang kompleks dengan mudah
+   - Kamu mendapatkan alternatif untuk inheritance ketika berurusan dengan preset configuration untuk object yang kompleks
+
+2. Kekurangan
+   - Mengclone object yang kompleks yang memiliki referensi melingkar mungkin sangat sulit
