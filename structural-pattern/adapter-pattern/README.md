@@ -1,127 +1,52 @@
 # Adapter Pattern
 
-## Overview
+Adapter pattern adalah salah satu dari design pattern dalam kategori structural pattern. Pattern ini memungkinkan 2 interface yang tidak kompatibel untuk bekerja sama dengan menghubungkan mereka melalui adapter class. Pattern ini bertindak sebagai perantara antara 2 interface yang berbeda, sehingga class tersebut bisa saling berinteraksi tanpa perlu mengubah code yang sudah ada.
 
-The Adapter Pattern, is used to enable the interaction between two incompatible interfaces by creating a wrapper object that can translate requests between both interfaces. In Golang, this pattern is quite useful when you have two interfaces, but their functionalities do not match, and you need to make them work together.
+# Problem
 
-## Implementation
+Bayangkan kita memiliki sebuah system lama yang sudah berfungsi dengan baik namun menggunakan interface atau method tertentu. Seiring waktu, kita mungkin ingin mengguanakan komponen baru yang lebih modern, namu komponen baru ini memiliki interface yang berbeda. Mengubah system lama untuk support interface baru ini bisa sangat mahal dan beresiko, terutama jika system lama digunakan diberbagai tempat.
 
-The Adapter Pattern consists of four components:
+## Contoh masalah
 
-1. **Target Interface**:
-   The interface that the client is expecting to interact with.
-2. **Adapter**:
-   The object that implements the Target Interface and wraps the Adaptee.
-3. **Adaptee**:
-   The interface that needs to be adapted to be used by the client.
-4. **Client**:
-   The component that uses the Target Interface.
+1. Sebuah aplikasi lama yang menggunakan library logging yang memiliki interface tertentu, tetapi kita ingin mengintegrasikan library logging baru yang memiliki interface yang berbeda.
+2. Kita memiliki system yang berkomunikasi dengan API eksternal, namu api tersebut telah diperbarui dan menggunakan format atau protokol yang berbeda.
 
-```go
-type Target interface {
-    Request() string
-}
+# Solution
 
-type Adaptee interface {
-    SpecificRequest() string
-}
+Adapter pattern memungkinkan kita membuat class adapter yang menerjemahkan interface baru ke dalam format yang bisa dimengerti oleh system lama, atau sebaliknya.. Dengan cara ini, kita menggunakan komponen baru tanpa harus mengubah code yang sudah ada.
 
-type adapteeImpl struct {}
+## Solusi umum
 
-func (a *adapteeImpl) SpecificRequest() string {
-    return "Adaptee request"
-}
+1. Membuat sebuah class adapter yang mengimplementasikan interface yang diinginkan dan didalamnya memanggil atau memetakan fungsi dari class atau komponen lain yang memiliki interface yang berbeda.
+2. Adapter ini menjadi perantara yang mengubah bahasa atau format antara 2 class yang berbeda, sehingga mereka bisa berinteraksi.
 
-type adapter struct {
-    adaptee Adaptee
-}
+# Use Cases
 
-func (a *adapter) Request() string {
-    return "Adapter: " + a.adaptee.SpecificRequest()
-}
+1. Interfacing dengan database:
+   Jika kita mengubah database yang digunakan, kita bisa menggunakan adapter untuk memasttikan interface fungsi database tetap konsisten.
+2. Integrasi API Eksternal:
+   Saat kita beralih dari 1 service eksternal ke service lain dengan interface API yang berbeda, adapter bisa digunakan untuk menyembunyikan perbedaan dari code.
+3. Logger Abstraction:
+   Menggunakan adapter untuk mengabstraksi implementasi logging, sehingga jika kamu mengganti library logging, perubahan hanya dilakukan di adapter tanpa mengubah seluruh code aplikasi.
 
-func main() {
-    adaptee := &adapteeImpl{}
-    target := &adapter{
-        adaptee: adaptee,
-    }
+# Structure
 
-    fmt.Println(target.Request())
-}
-```
+- Target adalah antarmuka yang diharapkan oleh sistem.
+- Adaptee adalah kelas dengan antarmuka berbeda yang ingin Anda gunakan.
+- Adapter adalah kelas yang mengimplementasikan antarmuka Target dan memetakan fungsionalitas Adaptee ke dalam format yang bisa diterima oleh Target.
 
-In this example, we have two interfaces, Target and Adaptee, that are incompatible. We create a concrete implementation of Adaptee, adapteeImpl, and an adapter that implements the Target interface and wraps the Adaptee interface.
+# Kapan Harus Menggunakan Adapter Pattern
 
-# Examples
+- kita ingin menggunakan kelas atau komponen yang ada tetapi antarmukanya tidak kompatibel dengan kode yang ada.
+- Kita ingin meminimalkan perubahan pada kode lama saat mengintegrasikan teknologi baru.
+- Kita perlu mendukung antarmuka lama sambil beralih ke antarmuka baru secara bertahap.
 
-Let's take an example of a payment gateway that accepts payments from different payment providers like Gopay, Ovo, paypal and Amazon Pay. Each payment provider has its own unique interface to connect with the payment gateway. If we want to add a new payment provider, we need to create a new interface and implement it.
+# Kekurangan dan Kelebihan
 
-To solve this problem, we can create an adapter for each payment provider that implements the payment gateway's standard interface. Let's take an example of PayPal payment provider:
+1. Kelebihan
 
-```go
-// gopay.go
+   - Single Responsibility Principle, Kita dapat memisahkan interface atau code konversi data dari logic bisnis utama program
+   - Open/Closed Principle, Kita dapat memperkenalkan jenis adapter baru ke dalam program tanpa merusak code client yang ada
 
-type Gopay struct {}
-
-func (p *Gopay) MakePayment(amount float32) bool {
-    // connect to Gopay and process payment
-    return true
-}
-
-// ovo.go
-
-type Ovo struct {}
-
-func (a *Ovo) PayOvo(amount float32) bool {
-    // connect to Ovo and process payment
-    return true
-}
-
-// gateway.go
-
-type PaymentGateway interface {
-    ProcessPayment(amount float32) bool
-}
-
-type GopayAdapter struct {
-    Gopay *Gopay
-}
-
-func (p *GopayAdapter) ProcessPayment(amount float32) bool {
-    return p.Gopay.MakePayment(amount)
-}
-
-type OvoAdapter struct {
-    Ovo *Ovo
-}
-
-func (a *OvoAdapter) ProcessPayment(amount float32) bool {
-    return a.Ovo.PayOvo(amount)
-}
-
-// main.go
-
-func main() {
-    paymentGateway := &GopayAdapter{
-        Gopay: &Gopay{},
-    }
-
-    paymentGateway2 := &OvoAdapter{
-        Ovo: &Ovo{},
-    }
-
-    paymentGateway.ProcessPayment(100)
-
-    paymentGateway2.ProcessPayment(100)
-}
-```
-
-In this example, we have a PaymentGateway interface that needs to be implemented by all the payment providers. The `Gopay` provider has its own unique interface, so we create an adapter, GopayAdapter, that implements the PaymentGateway interface and wraps the `Gopay` interface. Now, we can use the `Gopay` provider with the payment gateway without changing the payment gateway's implementation. We can also imagine to add an adapter for `Ovo`, which has its own API implemented in `Ovo`.
-
-## Conclusion
-
-In conclusion, the Adapter Pattern is a useful pattern in Golang when you have two incompatible interfaces that need to work together. It creates a wrapper object that can translate requests between both interfaces. The real-world example of a payment gateway shows how we can use this pattern to create adapters for different payment providers without changing the payment gateway's implementation.
-
-## References
-
-https://blog.matthiasbruns.com/golang-adapter-pattern
+2. Kekurangan
+   - Keseluruhan kompleksitas kode meningkat karena Anda perlu memperkenalkan serangkaian antarmuka dan kelas baru. Kadang-kadang lebih sederhana hanya dengan mengubah kelas layanan sehingga cocok dengan kode Anda yang lain.
