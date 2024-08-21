@@ -15,7 +15,10 @@ Dengan menggunakan observer pattern, kita dapat membuat komponen-komponen terseb
 # Kelebihan dan Kekurangan
 
 1. Kelebihan
+   1. Open/Closed Principle, Kita dapat memperkenalkan class subject baru tanpa harus mengubah code pada observer.
+   2. Kita dapat membuat relasi antar object pada saat runtime.
 2. Kekurangan
+   1. Observer akan notify secara acak.
 
 # Use Case
 
