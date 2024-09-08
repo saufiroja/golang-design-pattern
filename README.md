@@ -381,6 +381,122 @@ func main() {
 
 ## I - Interface Segregation Principle
 
+Interface Segregation Principle (ISP) adalah salah satu prinsip dalam SOLID yang menyatakan bahwa sebuah interface yang besar dan kompleks harus dipecah menjadi beberapa interface yang lebih kecil dan lebih spesifik sehingga class yang mengimplementasikan interface tersebut tidak perlu mengimplementasikan method yang tidak diperlukan.
+
+Untuk mengurangi ketergantungan yang tidak perlu dan meningkatkan fleksibilitas serta pemeriharaan code. Dengan memisahkan interface menjadi bagian-bagian kecil dan relevan, kita bisa menghindari perubahan yang berdampak besar pada implementasi yang ada dan membuat code lebih mudah dipahami.
+
+Dengan membagi interface besar menjadi beberapa interface yang lebih kecil dan spesifik, dan memastikan setiap implementasi hanya mengimplementasikan method yang diperlukan. Ini dapat dilakukan dengan membuat interface dengan tanggung jawab yang berbeda dan membuat class atau struktur yang mengimplementasikan interface tersebut sesuai dengan kebutuhan.
+
+### Example
+
+- Contoh melanggar prinsip Interface Segregation
+
+```go
+package main
+
+import "fmt"
+
+type Notification interface {
+	SendEmail(email, subject, body string) error
+	SendSMS(phone, message string) error
+}
+
+type NotificationService struct{}
+
+func (ns *NotificationService) SendEmail(email, subject, body string) error {
+	fmt.Printf("Sending email to %s with subject: %s\n", email, subject)
+	return nil
+}
+
+func (ns *NotificationService) SendSMS(phone, message string) error {
+	fmt.Printf("Sending SMS to %s with message: %s\n", phone, message)
+	return nil
+}
+
+func main() {
+	ns := NotificationService{}
+	ns.SendEmail("test@gmail.com", "Hello", "Hello, this is a test email")
+	ns.SendSMS("+1234567890", "Hello, this is a test SMS")
+}
+
+```
+
+- Contoh menerapkan interface segregation principle
+
+```go
+// Define interfaces
+type IEmailNotifier interface {
+	SendEmail(to string, subject string, body string) error
+}
+
+type ISMSNotifier interface {
+	SendSMS(to string, message string) error
+}
+
+// Implementations
+type EmailService struct{}
+
+func NewEmailService() IEmailNotifier {
+	return &EmailService{}
+}
+
+func (e *EmailService) SendEmail(to string, subject string, body string) error {
+	fmt.Printf("Sending email to %s with subject %s and body %s\n", to, subject, body)
+	return nil
+}
+
+type SMSService struct{}
+
+func NewSMSService() ISMSNotifier {
+	return &SMSService{}
+}
+
+func (s *SMSService) SendSMS(to string, message string) error {
+	fmt.Printf("Sending SMS to %s with message %s\n", to, message)
+	return nil
+}
+
+// HTTP Handlers
+
+type Handlers struct {
+	EmailService IEmailNotifier
+	SMSService   ISMSNotifier
+}
+
+func NewHandlers(emailService IEmailNotifier, smsService ISMSNotifier) *Handlers {
+	return &Handlers{
+		EmailService: emailService,
+		SMSService:   smsService,
+	}
+}
+
+func (h *Handlers) EmailHandler(w http.ResponseWriter, r *http.Request) {
+	h.EmailService.SendEmail("test@gmail.com", "Test subject", "Test body")
+	w.Write([]byte("Email sent"))
+}
+
+func (h *Handlers) SMSHandler(w http.ResponseWriter, r *http.Request) {
+	h.SMSService.SendSMS("1234567890", "Test message")
+	w.Write([]byte("SMS sent"))
+}
+
+func main() {
+	// Initialize services
+	emailService := NewEmailService()
+	smsService := NewSMSService()
+
+	// Initialize handlers
+	handlers := NewHandlers(emailService, smsService)
+
+	// Extract HTTP handlers
+	http.HandleFunc("/email", handlers.EmailHandler)
+	http.HandleFunc("/sms", handlers.SMSHandler)
+
+	// Start server
+	http.ListenAndServe(":8080", nil)
+}
+```
+
 ## D - Dependency Inversion Principle
 
 ## Creational Patterns
