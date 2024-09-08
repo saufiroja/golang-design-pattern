@@ -12,7 +12,7 @@ Jika suatu class melakukan terlalu banyak hal, Kita harus mengubahnya setiap kal
 
 Jika kita merasa sulit untuk fokus pada aspek tertentu dari program satu per satu, ingatlah prinsip single responsibility dan periksa apakah sudah waktunya untuk membagi beberapa class menjadi beberapa bagian yang lebih kecil.
 
-## Example
+### Example
 
 Misalkan kita memiliki sebuah aplikasi yang menangani pendaftaran pengguna (user registration). Ada beberapa langkah dalam pendaftaran ini, seperti validasi data pengguna, menyimpan data ke database, dan mengirim email konfirmasi.
 
@@ -175,7 +175,7 @@ Jika sebuah class sudah didevelop, diuji, direview, dan disertakan dalam suatu k
 
 Principle ini tidak dimaksudkan untuk diterapkan pada semua perubahan sebuah class. Jika kita mengetahui ada bug dalam class, langsung saja perbaiki, jangan membuat subclass untuk itu. Class anak tidak seharusnya bertanggung jawab atas masalah yang ada di class induknya.
 
-## Example
+### Example
 
 - Contoh melanggar prinsip open/closed
   Dicontoh ini, kita akan menambahkan diskon dengan menambahkan logic langsung ke fungsi `CalculateTotalPrice`. Ini melanggar prinsip open/closed karena kita harus memodifikasi fungsi tersebut setiap kali ingin menambah atau mengubah jenis produk. </br>
@@ -277,6 +277,107 @@ func main() {
 ```
 
 ## L - Liskov Substitution Principle
+
+Liskov Substitution Principle (LSP) adalah salah satu prinsip dalam SOLID yang menyatakan bahwa object dari suatu class turunan (subclass) harus dapat menggantikan object dari class induknya (superclass) tanpa mengubah sifat dasar dari class tersebut. Dengan kata lain, subclass harus dapat digunakan dimanapun superclass digunakan dan tetap menjaga perilaku yang benar.
+
+Prinsip ini penting untuk menjaga keselarasan dalam pemrograman berorientasi objek, sehingga code dapat tetap lebih fleksible dan dapat diperbarui tanpa menimbulkan error atau perilaku yang tidak diinginkan. LSP mendukung prinsip pemrograman terbuka untuk ekstensi, tertutup untuk modifikasi (Open/Closed Principle), yang membantu membuat code lebih mudah dipelihara.
+
+### Example
+
+- Contoh menerapkan prinsip Liskov Substitution
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+type IPaymentProcessor interface {
+	Pay(amount float64) string
+}
+
+// paypal struct
+type Paypal struct {
+	Email string
+}
+
+func (p *Paypal) Pay(amount float64) string {
+	return fmt.Sprintf("%0.2f paid using Paypal with email %s", amount, p.Email)
+}
+
+// credit card struct
+type CreditCard struct {
+	CardNumber     string
+	CardHolder     string
+	ExpirationDate string
+	CVV            string
+}
+
+func (c *CreditCard) Pay(amount float64) string {
+	if len(c.CardNumber) == 0 || len(c.CardHolder) == 0 || len(c.ExpirationDate) == 0 || len(c.CVV) == 0 {
+		return "Invalid credit card information"
+	}
+
+	return fmt.Sprintf("%0.2f paid using credit card with number %s", amount, c.CardNumber)
+}
+
+// factory pattern
+type PaymentGateway struct {
+	IPaymentProcessor
+}
+
+func (pg *PaymentGateway) ProcessPayment(request RequestData) string {
+	switch request.Method {
+	case "paypal":
+		pg.IPaymentProcessor = &Paypal{Email: request.Email}
+	case "credit_card":
+		pg.IPaymentProcessor = &CreditCard{
+			CardNumber:     request.CardNumber,
+			CardHolder:     request.CardHolder,
+			ExpirationDate: request.ExpirationDate,
+			CVV:            request.CVV,
+		}
+	default:
+		return "Invalid payment method"
+	}
+
+	return pg.IPaymentProcessor.Pay(request.Amount)
+}
+
+type RequestData struct {
+	Method         string  `json:"method"`
+	Amount         float64 `json:"amount"`
+	Email          string  `json:"email"`
+	CardNumber     string  `json:"card_number"`
+	CardHolder     string  `json:"card_holder"`
+	ExpirationDate string  `json:"expiration_date"`
+	CVV            string  `json:"cvv"`
+}
+
+func PaymentHandler(w http.ResponseWriter, r *http.Request) {
+	requestData := RequestData{}
+	err := json.NewDecoder(r.Body).Decode(&requestData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	gateway := PaymentGateway{}
+
+	response := gateway.ProcessPayment(requestData)
+
+	w.Write([]byte(response))
+}
+
+func main() {
+	http.HandleFunc("/payment", PaymentHandler)
+	http.ListenAndServe(":8080", nil)
+}
+
+```
 
 ## I - Interface Segregation Principle
 
